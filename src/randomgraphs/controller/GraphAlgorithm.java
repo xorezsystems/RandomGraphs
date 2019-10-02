@@ -1,8 +1,12 @@
 package randomgraphs.controller;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Stack;
 import randomgraphs.model.Edge;
 import randomgraphs.model.Graph;
 import randomgraphs.model.Node;
@@ -190,6 +194,151 @@ public class GraphAlgorithm {
             } catch (Exception e2) {
                 e2.printStackTrace();
             }
+        }
+    }
+
+    public static Graph BFS(Graph graph, Node initialNode) {
+        Graph graphBFS = new Graph();
+        HashMap<Integer, HashMap> mainLayer = new HashMap();
+        HashMap<Integer, Node> subLayer1 = new HashMap();
+        HashMap<Integer, Node> subLayer2 = new HashMap();
+        HashMap<Integer, Node> edgeAux = new HashMap();
+        HashMap<Integer, Edge> nodeAux = new HashMap();
+        int numL = 0, aux = 0, cv = 0;
+
+        graph.getNodes().get(initialNode.getId()).setF(true);
+        subLayer1.put(0, graph.getNodes().get(initialNode.getId()));
+        mainLayer.put(numL, (HashMap) subLayer1.clone());
+        edgeAux.put(cv, graph.getNodes().get(initialNode.getId()));
+
+        for (int x = 0; x <= initialNode.getId(); x++) {
+            subLayer2.clear();
+            int num = -1;
+            for (int i = 0; i < subLayer1.size(); i++) {
+                for (int j = 0; j < graph.getEdge().size(); j++) {
+                    if (subLayer1.get(i).getId() == graph.getEdges().get(j).getId1() && graph.getNodes().get(graph.getEdges().get(j).getId2()).getF() == false) {
+                        graph.getNodes().get(graph.getEdges().get(j).getId2()).setF(true);
+                        num++;
+                        subLayer2.put(num, graph.getNodes().get(graph.getEdges().get(j).getId2()));
+                        nodeAux.put(cv, graph.getEdges().get(j));
+                        cv++;
+                        edgeAux.put(aux + 1, graph.getNodes().get(graph.getEdges().get(j).getId2()));
+                    }
+                    if (subLayer1.get(i).getId() == graph.getEdges().get(j).getId2() && graph.getNodes().get(graph.getEdges().get(j).getId1()).getF() == false) {
+                        graph.getNodes().get(graph.getEdges().get(j).getId1()).setF(true);
+                        num++;
+                        subLayer2.put(num, graph.getNodes().get(graph.getEdges().get(j).getId1()));
+                        nodeAux.put(cv, graph.getEdges().get(j));
+                        cv++;
+                        edgeAux.put(cv, graph.getNodes().get(graph.getEdges().get(j).getId1()));
+                    }
+                }
+            }
+            numL++;
+            subLayer1 = (HashMap) subLayer2.clone();
+            mainLayer.put(numL, (HashMap) subLayer2.clone());
+        }
+        for (int i = 0; i < graph.getNode().size(); i++) {
+            graph.getNode().get(i).setVisited(false);
+        }
+
+        graphBFS.setG(edgeAux, nodeAux);
+        return graphBFS;
+    }
+
+    public static Graph DFS_R(Graph graph, Node initialNode) {
+        HashMap<Integer, Node> nodeAux = new HashMap();
+        HashMap<Integer, Edge> edgeAux = new HashMap();
+        Graph dfsR = new Graph(nodeAux, edgeAux);
+        Graph graphAux;
+
+        boolean[][] AdjMatrix = new boolean[graph.getNode().size()][graph.getNode().size()];
+        for (int i = 0; i < graph.getEdge().size(); i++) {
+            AdjMatrix[graph.getEdge().get(i).getId1()][graph.getEdge().get(i).getId2()] = true;
+            AdjMatrix[graph.getEdge().get(i).getId2()][graph.getEdge().get(i).getId1()] = true;
+        }
+        graph.getNode().get(initialNode.getId()).setVisited(true);
+        dfsR.getNode().put(0, new Node(graph.getNode().get(initialNode.getId())));
+        for (int i = 0; i < graph.getNode().size(); i++) {
+            if (AdjMatrix[initialNode.getId()][i] == true && graph.getNode().get(i).getVisited() == false) {
+                graphAux = DFS_R(graph, graph.getNode().get(i));
+                int aux = dfsR.getNode().size();
+                for (int j = 0; j < graphAux.getNode().size(); j++) {
+                    dfsR.getNode().put(aux + j, graphAux.getNode().get(j));
+                }
+                dfsR.getEdge().put(dfsR.getEdge().size(), new Edge(initialNode.getId(), i));
+                aux = dfsR.getEdge().size();
+                if (graphAux.getEdge().isEmpty() != true) {
+                    for (int j = 0; j < graphAux.getEdge().size(); j++) {
+                        dfsR.getEdge().put(aux + j, graphAux.getEdge().get(j));
+                    }
+                }
+            }
+        }
+        return dfsR;
+    }
+
+    public static Graph DFS_I(Graph graph, Node initialNode) {
+        Stack<Integer> stack = new Stack<>();
+        HashMap<Integer, Node> nodeAux = new HashMap();
+        HashMap<Integer, Edge> edgeAux = new HashMap();
+        Graph dfsI = new Graph(nodeAux, edgeAux);
+
+        boolean[][] adjMatrix = new boolean[graph.getNode().size()][graph.getNode().size()];
+        boolean isVisited;
+        int j, x = 0;
+        for (int i = 0; i < graph.getEdge().size(); i++) {
+            adjMatrix[graph.getEdge().get(i).getId1()][graph.getEdge().get(i).getId2()] = true;
+            adjMatrix[graph.getEdge().get(i).getId2()][graph.getEdge().get(i).getId1()] = true;
+        }
+        stack.push(graph.getNode().get(0).getId());
+        graph.getNode().get(0).setVisited(true);
+        dfsI.getNode().put(x, new Node(graph.getNode().get(initialNode.getId())));
+
+        while (stack.isEmpty() == false) {
+            j = stack.peek();
+            isVisited = false;
+            for (int i = 0; i < graph.getNode().size(); i++) {
+                if (adjMatrix[j][i] == true && graph.getNode().get(i).getVisited() == false) {
+                    graph.getNode().get(i).setVisited(true);
+                    dfsI.getEdge().put(x, new Edge(j, i));
+                    x++;
+                    dfsI.getNode().put(x, new Node(graph.getNode().get(i)));
+                    stack.push(i);
+                    isVisited = true;
+                    i = graph.getNode().size();
+                }
+                if (i == graph.getNode().size() - 1 && isVisited == false) {
+                    stack.pop();
+                }
+            }
+        }
+        for (int i = 0; i < graph.getNode().size(); i++) {
+            graph.getNode().get(i).setVisited(false);
+        }
+        return dfsI;
+    }
+
+    public void generateAlgSearchFile(String algName, Graph graph) {
+        File f = new File(algName + ".gv");
+        String struct = "graph G {\n";
+
+        Iterator<HashMap.Entry<Integer, Node>> iterator1 = graph.getNodes().entrySet().iterator();
+        while (iterator1.hasNext()) {
+            struct += iterator1.next().getValue().id + ";\n";
+        }
+        Iterator<HashMap.Entry<Integer, Edge>> iterator2 = graph.getEdges().entrySet().iterator();
+        Iterator<HashMap.Entry<Integer, Edge>> iterator3 = graph.getEdges().entrySet().iterator();
+        while (iterator2.hasNext()) {
+            struct += iterator2.next().getValue().getId1() + "--" + iterator3.next().getValue().getId2() + ";\n";
+        }
+        PrintWriter pw;
+        try {
+            pw = new PrintWriter(f);
+            pw.write(struct);
+            pw.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
     }
 }
