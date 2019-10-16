@@ -118,4 +118,12 @@ public class Graph {
             graph.getNodes().get(i).setF(true);
         }
     }
+    
+    public void randomEdgeValues(float min, float max){
+         for (int i = 0; i < this.edge.size(); i++) {
+            this.edge.get(i).setP(Math.random()*(max-min)+min);
+        }
+       // GrafoCreacion G = new GrafoCreacion(this.nodo,this.arista);
+    }
+    
 }
