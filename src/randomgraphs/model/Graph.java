@@ -14,6 +14,9 @@ public class Graph {
     private HashMap<Integer, Stack> stack;
     int numEdges;
     int numNodes;
+    double minExpansionPrim = 0.0;
+    double minExpansionKruskalD = 0.0;
+    double minExpansionKruskalI = 0.0;
 
     public HashMap<Integer, Stack> getStack() {
         return stack;
@@ -118,4 +121,40 @@ public class Graph {
             graph.getNodes().get(i).setF(true);
         }
     }
+    
+    public void randomEdgeValues(float min, float max){
+         for (int i = 0; i < this.edge.size(); i++) {
+            this.edge.get(i).setP(Math.random()*(max-min)+min);
+        }
+       // GrafoCreacion G = new GrafoCreacion(this.nodo,this.arista);
+    }
+
+    public double getMinExpansionPrim() {
+        return minExpansionPrim;
+    }
+
+    public void setMinExpansionPrim(double minExpansionPrim) {
+        this.minExpansionPrim = minExpansionPrim;
+    }
+
+    public double getMinExpansionKruskalD() {
+        return minExpansionKruskalD;
+    }
+
+    public void setMinExpansionKruskalD(double minExpansionKruskalD) {
+        this.minExpansionKruskalD = minExpansionKruskalD;
+    }
+
+    public double getMinExpansionKruskalI() {
+        return minExpansionKruskalI;
+    }
+
+    public void setMinExpansionKruskalI(double minExpansionKruskalI) {
+        this.minExpansionKruskalI = minExpansionKruskalI;
+    }
+    
+    
+    
+    
+    
 }
